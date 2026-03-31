@@ -1,0 +1,85 @@
+.card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(6, 182, 212, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  cursor: default;
+}
+
+.card:hover {
+  border-color: rgba(34, 211, 238, 0.5);
+  transform: translateY(-5px);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(34, 211, 238, 0.12), 0 0 30px rgba(34, 211, 238, 0.08);
+}
+
+.poster {
+  height: 110px;
+  background: linear-gradient(135deg, #020d12 0%, #051a22 60%, #020d12 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.poster::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
+}
+
+.poster::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, rgba(6, 10, 13, 0.7));
+}
+
+.icon {
+  font-size: 2.2rem;
+  opacity: 0.4;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.card:hover .icon {
+  opacity: 0.75;
+  transform: scale(1.1);
+}
+
+.info {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.1px;
+}
+
+.year {
+  font-size: 0.68rem;
+  color: #22d3ee;
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  padding: 3px 9px;
+  border-radius: 99px;
+  flex-shrink: 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}

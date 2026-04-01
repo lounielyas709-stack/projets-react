@@ -1,79 +1,64 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Routes, Route } from 'react-router'
+import { motion } from 'framer-motion'
 import './App.css'
 
-import UserProfile from './components/UserProfile'
-import MovieCard from './components/MovieCard';
+import ParticleField from './components/ParticleField'
+import NavBar from './pages/NavBar'
+import Home from './pages/Home'
+import UserDescription from './pages/UserDescription'
+import FilmDescription from './pages/FilmDescription'
 
 function App() {
-  const [counter, setCounter] = useState(0);
-  const [showUsers, setShowUsers] = useState(true);
+  const [mouse, setMouse] = useState({ x: -500, y: -500 })
 
-  const users = [
-    { firstName: "John", lastName: "Doe", country: "France" },
-    { firstName: "Marie", lastName: "Zanzibar", country: "Germany" },
-    { firstName: "Richard", lastName: "Gascan", country: "UK" },
-    { firstName: "Sofia", lastName: "Martinez", country: "Spain" },
-    { firstName: "Luca", lastName: "Romani", country: "Italy" },
-    { firstName: "Yuki", lastName: "Tanaka", country: "Japan" },
-    { firstName: "Alex", lastName: "Carter", country: "USA" },
-  ];
+  useEffect(() => {
+    const move = (e) => setMouse({ x: e.clientX, y: e.clientY })
+    window.addEventListener('mousemove', move)
+    return () => window.removeEventListener('mousemove', move)
+  }, [])
 
-  const movies = [
-    { name: "Your Name", year: "2016" },
-    { name: "Interstellar", year: "2014" },
-    { name: "Dune", year: "2021" },
-    { name: "Oppenheimer", year: "2023" },
-    { name: "Blade Runner 2049", year: "2017" },
-    { name: "The Matrix", year: "1999" },
-    { name: "Inception", year: "2010" },
-    { name: "Parasite", year: "2019" },
-  ];
+  useEffect(() => {
+    const handleClick = (e) => {
+      const ring = document.createElement('div')
+      ring.style.cssText = `
+        position: fixed;
+        left: ${e.clientX}px;
+        top: ${e.clientY}px;
+        width: 0; height: 0;
+        border-radius: 50%;
+        border: 2px solid rgba(6, 182, 212, 0.8);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 9999;
+        animation: ripple-wave 0.7s ease-out forwards;
+      `
+      document.body.appendChild(ring)
+      setTimeout(() => ring.remove(), 700)
+    }
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [])
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1 className="app-title">React Playground</h1>
-        <p className="app-subtitle">Components demo</p>
-      </header>
+    <>
+      <ParticleField />
 
-      <main className="app-main">
+      <motion.div
+        className="cursor-glow"
+        animate={{ x: mouse.x - 200, y: mouse.y - 200 }}
+        transition={{ type: 'spring', stiffness: 800, damping: 90, mass: 0.3 }}
+      />
 
-        <section className="section">
-          <h2 className="section-title">Counter</h2>
-          <div className="counter-widget">
-            <button className="btn btn-minus" onClick={() => setCounter(c => c - 1)}>−</button>
-            <span className="counter-value">{counter}</span>
-            <button className="btn btn-plus" onClick={() => setCounter(c => c + 1)}>+</button>
-          </div>
-        </section>
-
-        <section className="section">
-          <div className="section-header">
-            <h2 className="section-title">Users</h2>
-            <button className="btn btn-toggle" onClick={() => setShowUsers(!showUsers)}>
-              {showUsers ? 'Hide' : 'Show'}
-            </button>
-          </div>
-          {showUsers && (
-            <div className="cards-grid">
-              {users.map((user, id) => (
-                <UserProfile key={id} firstName={user.firstName} lastName={user.lastName} country={user.country} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="section">
-          <h2 className="section-title">Movies</h2>
-          <div className="cards-grid">
-            {movies.map((movie, id) => (
-              <MovieCard key={id} name={movie.name} year={movie.year} />
-            ))}
-          </div>
-        </section>
-
-      </main>
-    </div>
+      <div className="app">
+        <NavBar />
+        <Routes>
+          <Route path="/"         element={<Home />} />
+          <Route path="/user/:id" element={<UserDescription />} />
+          <Route path="/film/:id" element={<FilmDescription />} />
+        </Routes>
+      </div>
+    </>
   )
 }
 

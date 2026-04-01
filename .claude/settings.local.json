@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(node -e \"const fs=require\\(''fs''\\); [''src/App.jsx'',''src/data.js'',''src/pages/Home.jsx'',''src/pages/NavBar.jsx''].forEach\\(f => { try { fs.accessSync\\(f\\); console.log\\(''OK:'', f\\) } catch { console.log\\(''MISSING:'', f\\) } }\\)\")",
+      "Bash(grep -n \"viewLink\\\\|to=\\\\`/film\\\\|to=\\\\`/user\\\\|id={id}\" src/components/MovieCard.jsx src/components/UserProfile.jsx src/pages/Home.jsx)"
+    ]
+  }
+}

@@ -8,6 +8,7 @@ import NavBar from './pages/NavBar'
 import Home from './pages/Home'
 import UserDescription from './pages/UserDescription'
 import FilmDescription from './pages/FilmDescription'
+import Contact from './pages/Contact'
 
 function App() {
   const [mouse, setMouse] = useState({ x: -500, y: -500 })
@@ -56,6 +57,8 @@ function App() {
           <Route path="/"         element={<Home />} />
           <Route path="/user/:id" element={<UserDescription />} />
           <Route path="/film/:id" element={<FilmDescription />} />
+          <Route path="/contact" element={<Contact />} />
+
         </Routes>
       </div>
     </>

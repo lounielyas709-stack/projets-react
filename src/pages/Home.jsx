@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import UserProfile from '../components/UserProfile'
 import MovieCard from '../components/MovieCard'
+import Contact from './Contact'
 import { users, movies } from '../data'
 
 const stagger = {
@@ -150,6 +151,18 @@ function Home() {
               </motion.div>
             ))}
           </motion.div>
+        </section>
+
+        {/* Contact */}
+        <section id="section-contact" className="section">
+          <motion.h2
+            className="section-title"
+            initial="hidden" whileInView="show" viewport={{ once: true }}
+            variants={fadeUp}
+          >
+            Contact
+          </motion.h2>
+          <Contact hideTitle />
         </section>
 
       </main>

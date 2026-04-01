@@ -17,17 +17,23 @@ function NavBar() {
       </Link>
 
       <div className={styles.links}>
-        {isHome ? (
+        {!isHome && (
+          <Link to="/" className={styles.navLink}>← Back</Link>
+        )}
+        {isHome && (
           <>
-            <button className={styles.link} onClick={() => scrollTo('section-users')}>
+            <button className={styles.navLink} onClick={() => scrollTo('section-users')}>
               Users
             </button>
-            <button className={styles.link} onClick={() => scrollTo('section-movies')}>
+            <button className={styles.navLink} onClick={() => scrollTo('section-movies')}>
               Movies
             </button>
           </>
+        )}
+        {isHome ? (
+          <button className={styles.navLink} onClick={() => scrollTo('section-contact')}>Contact</button>
         ) : (
-          <Link to="/" className={styles.backLink}>← Back</Link>
+          <Link to="/contact" className={styles.navLink}>Contact</Link>
         )}
       </div>
     </nav>

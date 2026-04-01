@@ -1,3 +1,10 @@
+export const genres = ['Sci-Fi', 'Drama', 'Thriller', 'Action', 'Fantasy', 'Mystery']
+
+export const countryFlags = {
+  France: '🇫🇷', Germany: '🇩🇪', UK: '🇬🇧',
+  USA: '🇺🇸', Spain: '🇪🇸', Italy: '🇮🇹', Japan: '🇯🇵',
+}
+
 export const users = [
   { firstName: "John",    lastName: "Doe",      country: "France"  },
   { firstName: "Marie",   lastName: "Zanzibar", country: "Germany" },

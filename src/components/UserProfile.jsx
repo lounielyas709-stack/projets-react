@@ -1,58 +1,18 @@
-import { useRef, useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router'
-import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { countryFlags } from '../data'
+import { useTilt } from '../hooks/useTilt'
+import { getUserStats } from '../utils/stats'
 import styles from './UserProfile.module.css'
 
-const countryFlags = {
-  France: '🇫🇷',
-  Germany: '🇩🇪',
-  UK: '🇬🇧',
-  USA: '🇺🇸',
-  Spain: '🇪🇸',
-  Italy: '🇮🇹',
-  Japan: '🇯🇵',
-}
-
-const genrePool = ['Sci-Fi', 'Drama', 'Thriller', 'Action', 'Fantasy', 'Mystery']
-
-function getStats(firstName, lastName) {
-  const seed = (firstName + lastName).split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-  return {
-    watched:   (seed % 180) + 20,
-    reviews:   (seed % 80) + 5,
-    avgRating: ((seed % 30) + 60) / 10,
-    genre:     genrePool[seed % genrePool.length],
-    progress:  (seed % 55) + 40,
-  }
-}
-
 function UserProfile({ firstName, lastName, country, id }) {
-  const spotRef = useRef()
   const [flipped, setFlipped] = useState(false)
-
-  const mx = useMotionValue(0)
-  const my = useMotionValue(0)
-  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [10, -10]), { stiffness: 300, damping: 25 })
-  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-10, 10]), { stiffness: 300, damping: 25 })
-
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    mx.set((e.clientX - rect.left) / rect.width - 0.5)
-    my.set((e.clientY - rect.top) / rect.height - 0.5)
-    if (spotRef.current) {
-      spotRef.current.style.background = `radial-gradient(circle at ${e.clientX - rect.left}px ${e.clientY - rect.top}px, rgba(6,182,212,0.2) 0%, transparent 65%)`
-    }
-  }
-
-  const handleMouseLeave = () => {
-    mx.set(0)
-    my.set(0)
-    if (spotRef.current) spotRef.current.style.background = 'none'
-  }
+  const { spotRef, rotateX, rotateY, handleMouseMove, handleMouseLeave } = useTilt('rgba(6,182,212,0.2)')
 
   const initials = `${firstName[0]}${lastName[0]}`
-  const flag = countryFlags[country] || '🌍'
-  const stats = getStats(firstName, lastName)
+  const flag     = countryFlags[country] || '🌍'
+  const stats    = useMemo(() => getUserStats(firstName, lastName), [firstName, lastName])
 
   return (
     <motion.div

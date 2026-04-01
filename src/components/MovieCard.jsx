@@ -1,45 +1,15 @@
-import { useRef, useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router'
-import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { useTilt } from '../hooks/useTilt'
+import { getMovieStats } from '../utils/stats'
 import styles from './MovieCard.module.css'
 
-const genres = ['Sci-Fi', 'Drama', 'Thriller', 'Action', 'Fantasy', 'Mystery']
-
-function getMovieStats(name) {
-  const seed = name.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-  return {
-    rating: ((seed % 30) + 65) / 10,
-    genre: genres[seed % genres.length],
-    runtime: (seed % 60) + 90,
-    votes: ((seed % 900) + 100) * 1000,
-  }
-}
-
 function MovieCard({ name, year, id }) {
-  const spotRef = useRef()
   const [flipped, setFlipped] = useState(false)
+  const { spotRef, rotateX, rotateY, handleMouseMove, handleMouseLeave } = useTilt()
 
-  const mx = useMotionValue(0)
-  const my = useMotionValue(0)
-  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [10, -10]), { stiffness: 300, damping: 25 })
-  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-10, 10]), { stiffness: 300, damping: 25 })
-
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    mx.set((e.clientX - rect.left) / rect.width - 0.5)
-    my.set((e.clientY - rect.top) / rect.height - 0.5)
-    if (spotRef.current) {
-      spotRef.current.style.background = `radial-gradient(circle at ${e.clientX - rect.left}px ${e.clientY - rect.top}px, rgba(34,211,238,0.16) 0%, transparent 65%)`
-    }
-  }
-
-  const handleMouseLeave = () => {
-    mx.set(0)
-    my.set(0)
-    if (spotRef.current) spotRef.current.style.background = 'none'
-  }
-
-  const stats = getMovieStats(name)
+  const stats = useMemo(() => getMovieStats(name), [name])
 
   return (
     <motion.div

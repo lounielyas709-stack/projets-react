@@ -1,33 +1,10 @@
 import { useParams } from 'react-router'
 import { motion } from 'framer-motion'
-import { users } from '../data'
+import { users, countryFlags } from '../data'
+import { getUserStats, strSeed } from '../utils/stats'
 import styles from './UserDescription.module.css'
 
-const countryFlags = {
-  France: '🇫🇷', Germany: '🇩🇪', UK: '🇬🇧',
-  USA: '🇺🇸', Spain: '🇪🇸', Italy: '🇮🇹', Japan: '🇯🇵',
-}
-
-const genrePool = ['Sci-Fi', 'Drama', 'Thriller', 'Action', 'Fantasy', 'Mystery']
-const badges    = ['Cinephile', 'Top Reviewer', 'Verified', '100 Films']
-
-function getStats(firstName, lastName) {
-  const seed = (firstName + lastName).split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-  return {
-    watched:   (seed % 180) + 20,
-    reviews:   (seed % 80)  + 5,
-    avgRating: ((seed % 30) + 60) / 10,
-    year:      2019 + (seed % 5),
-    progress:  (seed % 55) + 40,
-    followers: (seed % 900) + 100,
-    following: (seed % 300) + 50,
-    genres: [
-      { name: genrePool[seed % genrePool.length],         pct: (seed % 40) + 55 },
-      { name: genrePool[(seed + 1) % genrePool.length],   pct: (seed % 30) + 35 },
-      { name: genrePool[(seed + 2) % genrePool.length],   pct: (seed % 25) + 20 },
-    ],
-  }
-}
+const badges = ['Cinephile', 'Top Reviewer', 'Verified', '100 Films']
 
 function UserDescription() {
   const { id } = useParams()
@@ -37,10 +14,10 @@ function UserDescription() {
 
   const { firstName, lastName, country } = user
   const initials = `${firstName[0]}${lastName[0]}`
-  const flag  = countryFlags[country] || '🌍'
-  const stats = getStats(firstName, lastName)
-  const seed  = (firstName + lastName).split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-  const stars = Math.round(stats.avgRating / 2)
+  const flag     = countryFlags[country] || '🌍'
+  const stats    = getUserStats(firstName, lastName)
+  const seed     = strSeed(firstName + lastName)
+  const stars    = Math.round(stats.avgRating / 2)
 
   return (
     <motion.div

@@ -5,7 +5,7 @@ import { useTilt } from '../hooks/useTilt'
 import { getMovieStats } from '../utils/stats'
 import styles from './MovieCard.module.css'
 
-function MovieCard({ name, year, id }) {
+function MovieCard({ name, year, id, marked = false, onMark }) {
   const [flipped, setFlipped] = useState(false)
   const { spotRef, rotateX, rotateY, handleMouseMove, handleMouseLeave } = useTilt()
 
@@ -30,13 +30,20 @@ function MovieCard({ name, year, id }) {
         {/* Front */}
         <div className={styles.front}>
           <span className={styles.yearTop}>{year}</span>
+          <button
+            className={`${styles.markBtn} ${marked ? styles.markBtnActive : ''}`}
+            onClick={e => { e.stopPropagation(); onMark?.() }}
+          >
+            {marked ? '✓ Watched' : 'Not watched'}
+          </button>
           <div className={styles.poster}>
             <span className={styles.icon}>🎬</span>
+            {marked && <div className={styles.watchedBadge}>✓ Watched</div>}
+            <div className={styles.flipHint}>click to flip</div>
           </div>
           <div className={styles.info}>
             <p className={styles.name}>{name}</p>
           </div>
-          <div className={styles.flipHint}>click to flip</div>
         </div>
 
         {/* Back */}

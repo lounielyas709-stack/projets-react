@@ -1,4 +1,22 @@
-import { genres } from '../data'
+import { genres, movies, users } from '../data'
+
+const opinions = [
+  "A masterpiece. The cinematography alone is worth the watch.",
+  "Surprisingly moving. I didn't expect to care this much about the characters.",
+  "Overrated in my opinion. The pacing drags in the second half.",
+  "One of the best films I've seen this year. Absolutely gripping from start to finish.",
+  "Visually stunning but the script feels hollow. Style over substance.",
+  "The performances are outstanding. Every scene feels authentic.",
+  "A bit slow to start, but the payoff is incredible. Stick with it.",
+  "Genuinely unsettling. It stayed with me for days after watching.",
+  "Fun and entertaining, though it won't change your life.",
+  "A rare film that manages to be both intellectually stimulating and emotionally engaging.",
+  "The direction is impeccable. Every shot feels intentional.",
+  "Disappointing. Had so much potential but failed to deliver on its premise.",
+  "An emotional rollercoaster. I laughed, I cried, I was on the edge of my seat.",
+  "Solid but forgettable. Nothing stands out as particularly memorable.",
+  "A bold and ambitious film. Not perfect, but impossible to look away from.",
+]
 
 const castPool  = ['Emma Stone', 'Ryan Gosling', 'Cillian Murphy', 'Zendaya', 'Timothée Chalamet', 'Ana de Armas', 'Tom Hanks', 'Margot Robbie']
 const directors = ['Denis Villeneuve', 'Christopher Nolan', 'Bong Joon-ho', 'Makoto Shinkai', 'Ridley Scott', 'Sofia Coppola']
@@ -26,6 +44,27 @@ export function getMovieStats(name) {
     budget:      (seed % 150) + 50,
     language:    ['English', 'French', 'Japanese', 'Korean'][seed % 4],
   }
+}
+
+export function getFilmRecommenders(name) {
+  const seed = strSeed(name)
+  const count = (seed % 3) + 2
+  return Array.from({ length: count }, (_, i) => {
+    const id   = (seed + i * 3) % users.length
+    const user = users[id]
+    return { id, name: `${user.firstName} ${user.lastName}` }
+  })
+}
+
+export function getUserReviews(firstName, lastName) {
+  const seed = strSeed(firstName + lastName)
+  const count = (seed % 3) + 3
+  return Array.from({ length: count }, (_, i) => {
+    const movie   = movies[(seed + i * 7) % movies.length]
+    const rating  = ((seed + i * 13) % 5) + 6
+    const opinion = opinions[(seed + i * 5) % opinions.length]
+    return { name: movie.name, year: movie.year, rating, opinion }
+  })
 }
 
 export function getUserStats(firstName, lastName) {

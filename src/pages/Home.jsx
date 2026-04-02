@@ -1,27 +1,54 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 import UserProfile from '../components/UserProfile'
 import MovieCard from '../components/MovieCard'
+import Toast from '../components/Toast'
 import Contact from './Contact'
-import { users, movies } from '../data'
+import { users, movies, genres } from '../data'
+import { getMovieStats } from '../utils/stats'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { useWatched } from '../hooks/useWatched'
+
+const PREVIEW = 8
 
 const stagger = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08 } },
 }
-
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 22 } },
 }
 
+const todayFilm = (() => {
+  const dateInt = parseInt(new Date().toISOString().slice(0, 10).replace(/-/g, ''))
+  return { movie: movies[dateInt % movies.length], id: dateInt % movies.length }
+})()
+
 function Home() {
-  const [counter, setCounter] = useState(0)
+  usePageTitle(null)
+  const navigate = useNavigate()
+  const { marked, toggleMark: _toggleMark } = useWatched()
+
+  const [counter,   setCounter]   = useState(0)
   const [direction, setDirection] = useState(1)
   const [showUsers, setShowUsers] = useState(true)
+  const [search,       setSearch]       = useState('')
+  const [filmSearch,   setFilmSearch]   = useState('')
+  const [genreFilter,  setGenreFilter]  = useState('')
+  const [sortBy,       setSortBy]       = useState('')
+  const [loading,      setLoading]      = useState(true)
+  const [toast,        setToast]        = useState({ visible: false, message: '' })
 
+  const filmSearchRef = useRef()
   const plusRef  = useRef()
   const minusRef = useRef()
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 700)
+    return () => clearTimeout(t)
+  }, [])
 
   useEffect(() => {
     const buttons = [plusRef.current, minusRef.current].filter(Boolean)
@@ -45,8 +72,54 @@ function Home() {
     return () => window.removeEventListener('mousemove', handleMove)
   }, [])
 
+  // Raccourci clavier "/" → focus barre de recherche films
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault()
+        filmSearchRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  const showToast = useCallback((message) => {
+    setToast({ visible: true, message })
+    setTimeout(() => setToast({ visible: false, message: '' }), 2000)
+  }, [])
+
+  const toggleMark = useCallback((id) => {
+    const wasWatched = marked.has(id)
+    _toggleMark(id)
+    showToast(wasWatched ? '✕ Removed from watchlist' : '✓ Added to watchlist')
+  }, [marked, _toggleMark, showToast])
+
   const increment = () => { setDirection(1);  setCounter(c => c + 1) }
   const decrement = () => { setDirection(-1); setCounter(c => c - 1) }
+
+  const goRandom = () => {
+    const id = Math.floor(Math.random() * movies.length)
+    navigate(`/film/${id}`)
+  }
+
+  const filteredMovies = useMemo(() => {
+    let result = movies
+    if (filmSearch)  result = result.filter(m => m.name.toLowerCase().includes(filmSearch.toLowerCase()))
+    if (genreFilter) result = result.filter(m => getMovieStats(m.name).genre === genreFilter)
+    if (sortBy === 'rating') result = [...result].sort((a, b) => getMovieStats(b.name).rating - getMovieStats(a.name).rating)
+    if (sortBy === 'year')   result = [...result].sort((a, b) => parseInt(b.year) - parseInt(a.year))
+    return result.slice(0, PREVIEW)
+  }, [filmSearch, genreFilter, sortBy])
+
+  const filteredUsers = useMemo(() => {
+    if (!search) return users.slice(0, PREVIEW)
+    const q = search.toLowerCase()
+    return users.filter(u =>
+      `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
+      u.country.toLowerCase().includes(q)
+    ).slice(0, PREVIEW)
+  }, [search])
 
   return (
     <>
@@ -63,7 +136,7 @@ function Home() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.15, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
-          React Playground
+          MovieTreasures
         </motion.h1>
         <motion.p
           className="app-subtitle"
@@ -71,8 +144,31 @@ function Home() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.45, duration: 0.7 }}
         >
-          Components demo
+          Find your watch tonight !
         </motion.p>
+        <motion.div
+          className="hero-stats"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.65, duration: 0.7 }}
+        >
+          <span>🎬 {movies.length} films</span>
+          <span className="hero-stats-dot">·</span>
+          <span>🎙️ {users.length} experts</span>
+          <span className="hero-stats-dot">·</span>
+          <span>✓ {marked.size} watched</span>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+          style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}
+        >
+          <button className="btn-random" onClick={goRandom}>🎲 Je me lance</button>
+          <Link to={`/film/${todayFilm.id}`} className="btn-random" style={{ textDecoration: 'none', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.3)' }}>
+            🎬 Film du jour : {todayFilm.movie.name}
+          </Link>
+        </motion.div>
       </motion.header>
 
       <main className="app-main">
@@ -100,31 +196,55 @@ function Home() {
           </motion.div>
         </motion.section>
 
-        {/* Users */}
-        <section id="section-users" className="section">
+        {/* Experts */}
+        <section id="section-experts" className="section">
           <motion.div
             className="section-header"
             initial="hidden" whileInView="show" viewport={{ once: true }}
             variants={fadeUp}
           >
-            <h2 className="section-title">Users</h2>
-            <button className="btn btn-toggle" onClick={() => setShowUsers(!showUsers)}>
+            <h2 className="section-title">Experts</h2>
+            <button className="btn btn-toggle" onClick={() => setShowUsers(s => !s)}>
               {showUsers ? 'Hide' : 'Show'}
             </button>
           </motion.div>
+
           <AnimatePresence>
             {showUsers && (
               <motion.div
-                className="cards-grid"
                 initial="hidden" animate="show"
                 exit={{ opacity: 0, transition: { duration: 0.15 } }}
                 variants={stagger}
               >
-                {users.map((user, id) => (
-                  <motion.div key={id} variants={fadeUp}>
-                    <UserProfile {...user} id={id} />
+                <motion.div variants={fadeUp} style={{ marginBottom: 16 }}>
+                  <input
+                    className="search-input"
+                    type="text"
+                    placeholder="Search an expert..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                </motion.div>
+
+                {filteredUsers.length === 0 ? (
+                  <p className="no-results">No experts match your search.</p>
+                ) : (
+                  <motion.div className="cards-grid" variants={stagger}>
+                    {filteredUsers.map((user, i) => (
+                      <motion.div key={i} variants={fadeUp}>
+                        <UserProfile {...user} id={users.indexOf(user)} />
+                      </motion.div>
+                    ))}
                   </motion.div>
-                ))}
+                )}
+
+                {!search && (
+                  <motion.div variants={fadeUp} className="see-more-row">
+                    <Link to="/experts" className="see-more-btn">
+                      See all {users.length} experts →
+                    </Link>
+                  </motion.div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -139,18 +259,69 @@ function Home() {
           >
             Movies
           </motion.h2>
-          <motion.div
-            className="cards-grid"
-            initial="hidden" whileInView="show"
-            viewport={{ once: true, amount: 0.05 }}
-            variants={stagger}
-          >
-            {movies.map((movie, id) => (
-              <motion.div key={id} variants={fadeUp}>
-                <MovieCard {...movie} id={id} />
+
+          <div className="movies-controls" style={{ marginBottom: 16 }}>
+            <input
+              ref={filmSearchRef}
+              className="search-input"
+              type="text"
+              placeholder='Search a film... (press "/" to focus)'
+              value={filmSearch}
+              onChange={e => setFilmSearch(e.target.value)}
+            />
+            <div className="filter-pills">
+              <button className={`filter-pill ${genreFilter === '' ? 'filter-pill-active' : ''}`} onClick={() => setGenreFilter('')}>All</button>
+              {genres.map(g => (
+                <button key={g} className={`filter-pill ${genreFilter === g ? 'filter-pill-active' : ''}`} onClick={() => setGenreFilter(g)}>{g}</button>
+              ))}
+            </div>
+            <div className="sort-pills">
+              <span className="sort-label">Sort:</span>
+              {[['', 'Default'], ['rating', 'Rating'], ['year', 'Year']].map(([val, label]) => (
+                <button key={val} className={`filter-pill ${sortBy === val ? 'filter-pill-active' : ''}`} onClick={() => setSortBy(val)}>{label}</button>
+              ))}
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="cards-grid">
+              {Array.from({ length: PREVIEW }).map((_, i) => (
+                <div key={i} className="skeleton-card" />
+              ))}
+            </div>
+          ) : filteredMovies.length === 0 ? (
+            <p className="no-results">No films match your search.</p>
+          ) : (
+            <>
+              <motion.div
+                className="cards-grid"
+                initial="hidden"
+                animate="show"
+                variants={stagger}
+              >
+                {filteredMovies.map((movie) => {
+                  const id = movies.indexOf(movie)
+                  return (
+                    <motion.div key={id} variants={fadeUp}>
+                      <MovieCard
+                        {...movie}
+                        id={id}
+                        marked={marked.has(id)}
+                        onMark={() => toggleMark(id)}
+                      />
+                    </motion.div>
+                  )
+                })}
               </motion.div>
-            ))}
-          </motion.div>
+              {!filmSearch && (
+                <div className="see-more-row">
+                  <Link to="/films" className="see-more-btn">
+                    See all {movies.length} films →
+                  </Link>
+                </div>
+              )}
+            </>
+          )}
         </section>
 
         {/* Contact */}
@@ -166,6 +337,8 @@ function Home() {
         </section>
 
       </main>
+
+      <Toast message={toast.message} visible={toast.visible} />
     </>
   )
 }

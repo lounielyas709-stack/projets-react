@@ -1,18 +1,29 @@
-import { useParams } from 'react-router'
+import { useState } from 'react'
+import { useParams, Link } from 'react-router'
 import { motion } from 'framer-motion'
 import { movies } from '../data'
-import { getMovieStats } from '../utils/stats'
+import { getMovieStats, getFilmRecommenders } from '../utils/stats'
+import { usePageTitle } from '../hooks/usePageTitle'
 import styles from './FilmDescription.module.css'
 
 function FilmDescription() {
   const { id } = useParams()
   const film = movies[parseInt(id)]
+  const [copied, setCopied] = useState(false)
 
   if (!film) return <p style={{ color: '#9ca3af', padding: 40 }}>Film not found.</p>
 
   const { name, year } = film
-  const data  = getMovieStats(name)
-  const stars = Math.round(data.rating / 2)
+  usePageTitle(name)
+  const data         = getMovieStats(name)
+  const stars        = Math.round(data.rating / 2)
+  const recommenders = getFilmRecommenders(name)
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <motion.div
@@ -45,6 +56,9 @@ function FilmDescription() {
               <span className={styles.votes}>{(data.votes / 1000).toFixed(0)}k votes</span>
             </div>
           </div>
+          <button onClick={handleShare} className={styles.shareBtn}>
+            {copied ? '✓ Lien copié !' : '🔗 Partager'}
+          </button>
         </div>
       </div>
 
@@ -90,6 +104,16 @@ function FilmDescription() {
             <div className={styles.scoreFill} style={{ width: `${(data.rating / 10) * 100}%` }} />
           </div>
           <span className={styles.scoreValue}>{data.rating.toFixed(1)}/10</span>
+        </div>
+      </div>
+
+      {/* Recommended by */}
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>Recommended by</h2>
+        <div className={styles.recommenders}>
+          {recommenders.map(r => (
+            <Link key={r.id} to={`/user/${r.id}`} className={styles.recommenderBadge}>{r.name}</Link>
+          ))}
         </div>
       </div>
     </motion.div>

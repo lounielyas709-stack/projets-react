@@ -1,7 +1,11 @@
+import { useMemo } from 'react'
 import { useParams } from 'react-router'
 import { motion } from 'framer-motion'
-import { users, countryFlags } from '../data'
-import { getUserStats, strSeed } from '../utils/stats'
+import { users, movies, countryFlags } from '../data'
+import { getUserStats, getUserReviews, strSeed } from '../utils/stats'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { useAuth } from '../context/AuthContext'
+import { useWatched } from '../hooks/useWatched'
 import styles from './UserDescription.module.css'
 
 const badges = ['Cinephile', 'Top Reviewer', 'Verified', '100 Films']
@@ -13,11 +17,22 @@ function UserDescription() {
   if (!user) return <p style={{ color: '#9ca3af', padding: 40 }}>User not found.</p>
 
   const { firstName, lastName, country } = user
+  usePageTitle(`${firstName} ${lastName}`)
+  const { user: authUser } = useAuth()
+  const { marked } = useWatched()
   const initials = `${firstName[0]}${lastName[0]}`
   const flag     = countryFlags[country] || '🌍'
   const stats    = getUserStats(firstName, lastName)
+  const reviews  = getUserReviews(firstName, lastName)
   const seed     = strSeed(firstName + lastName)
   const stars    = Math.round(stats.avgRating / 2)
+
+  const filmsInCommon = useMemo(() =>
+    reviews.filter(r => {
+      const idx = movies.findIndex(m => m.name === r.name)
+      return idx !== -1 && marked.has(idx)
+    }).length
+  , [reviews, marked])
 
   return (
     <motion.div
@@ -40,6 +55,11 @@ function UserDescription() {
             {badges.slice(0, seed % 3 + 2).map(b => (
               <span key={b} className={styles.badge}>{b}</span>
             ))}
+            {authUser && (
+              <span className={styles.badge} style={{ background: 'rgba(6,182,212,0.15)', color: '#22d3ee', borderColor: 'rgba(6,182,212,0.3)' }}>
+                🎬 {filmsInCommon} film{filmsInCommon !== 1 ? 's' : ''} en commun
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -80,6 +100,24 @@ function UserDescription() {
           <span className={styles.levelNext}>{stats.avgRating.toFixed(1)}/10</span>
         </div>
         <p className={styles.levelCaption}>{stats.progress}% of films rated</p>
+      </div>
+
+      {/* Reviews */}
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>Reviews</h2>
+        <div className={styles.reviewsGrid}>
+          {reviews.map((r, i) => (
+            <div key={i} className={styles.reviewCard}>
+              <div className={styles.reviewHeader}>
+                <span className={styles.reviewFilm}>{r.name}</span>
+                <span className={styles.reviewYear}>{r.year}</span>
+                <span className={styles.reviewRating}>{'★'.repeat(Math.round(r.rating / 2))}{'☆'.repeat(5 - Math.round(r.rating / 2))}</span>
+                <span className={styles.reviewScore}>{r.rating}/10</span>
+              </div>
+              <p className={styles.reviewOpinion}>{r.opinion}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Favourite genres */}

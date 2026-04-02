@@ -69,3 +69,63 @@
   color: #22d3ee;
   background: rgba(6, 182, 212, 0.07);
 }
+
+.navLinkActive {
+  color: #22d3ee;
+}
+
+.logoActive .logoText {
+  color: #22d3ee;
+}
+
+.userZone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(6, 182, 212, 0.15);
+}
+
+.userAvatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0891b2, #22d3ee);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 800;
+  color: #060a0d;
+  flex-shrink: 0;
+}
+
+.userName {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #9ca3af;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logoutBtn {
+  background: none;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: #6b7280;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.logoutBtn:hover {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.4);
+}

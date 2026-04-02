@@ -1,6 +1,6 @@
 # MovieTreasures
 
-Application web de catalogue de films construite avec React. Explorez 55 films, découvrez 57 experts critiques, gérez votre watchlist personnelle et trouvez votre film du soir.
+Application web de catalogue de films construite avec React. Explorez 56 films, découvrez 57 experts critiques, gérez votre watchlist personnelle et trouvez votre film du soir.
 
 ## Stack technique
 
@@ -14,7 +14,7 @@ Application web de catalogue de films construite avec React. Explorez 55 films, 
 
 ## Fonctionnalités
 
-- Catalogue de **55 films** et **57 experts**, triés alphabétiquement
+- Catalogue de **56 films** et **57 experts**
 - Recherche, filtrage par genre et tri (note / année) sur films et experts
 - **Watchlist** personnelle avec stats (genres favoris, progression)
 - **Authentification** avec 4 comptes fictifs — watchlist isolée par compte
